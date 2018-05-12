@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-05-11 18:37+0000\n"
+"POT-Creation-Date: 2018-05-12 19:00+0000\n"
 "PO-Revision-Date: 2018-05-09 00:59+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -42,26 +42,26 @@ msgstr "Erträge"
 msgid "Expense account"
 msgstr "Aufwendungen"
 
-#: byro/common/forms/registration.py:9 byro/members/models.py:48
+#: byro/common/forms/registration.py:9 byro/members/models.py:49
 msgid "Membership number/ID"
 msgstr "Mitgliedsnummer"
 
-#: byro/common/forms/registration.py:10 byro/members/models.py:54
+#: byro/common/forms/registration.py:10 byro/members/models.py:55
 #: byro/office/templates/office/account/list.html:16
 #: byro/office/templates/office/member/list.html:32
 #: byro/office/templates/office/upload/list.html:16
 msgid "Name"
 msgstr "Name"
 
-#: byro/common/forms/registration.py:11 byro/members/models.py:59
+#: byro/common/forms/registration.py:11 byro/members/models.py:60
 msgid "Address"
 msgstr "Adresse"
 
-#: byro/common/forms/registration.py:12 byro/members/models.py:64
+#: byro/common/forms/registration.py:12 byro/members/models.py:65
 msgid "E-Mail"
 msgstr "E-Mail-Adresse"
 
-#: byro/common/forms/registration.py:13
+#: byro/common/forms/registration.py:13 byro/members/models.py:74
 msgid "Contact type"
 msgstr "Kontakt-Typ"
 
@@ -77,7 +77,7 @@ msgstr "Beitrag"
 msgid "Payment interval"
 msgstr "Zahlungsintervall"
 
-#: byro/common/models/configuration.py:21 byro/members/models.py:182
+#: byro/common/models/configuration.py:21 byro/members/models.py:184
 msgid "name"
 msgstr "Name"
 
@@ -323,60 +323,60 @@ msgstr "CC"
 msgid "Sent at"
 msgstr "Verschickt"
 
-#: byro/members/models.py:77
+#: byro/members/models.py:79
 #: byro/office/templates/office/account/detail.html:17
 msgid "Member"
 msgstr "Mitglied"
 
-#: byro/members/models.py:172
+#: byro/members/models.py:174
 msgid "monthly"
 msgstr "monatlich"
 
-#: byro/members/models.py:173
+#: byro/members/models.py:175
 msgid "quarterly"
 msgstr "pro Quartal"
 
-#: byro/members/models.py:174
+#: byro/members/models.py:176
 msgid "biannually"
 msgstr "halbjährlich"
 
-#: byro/members/models.py:175
+#: byro/members/models.py:177
 msgid "annually"
 msgstr "jährlich"
 
-#: byro/members/models.py:186
+#: byro/members/models.py:188
 msgid "amount"
 msgstr "Betrag"
 
-#: byro/members/models.py:187
+#: byro/members/models.py:189
 msgid "Please enter the yearly fee for this membership type."
 msgstr "Bitte gib den Jahresbeitrag für diesen Beitragstyp ein."
 
-#: byro/members/models.py:198
+#: byro/members/models.py:200
 msgid "start"
 msgstr "Beginn"
 
-#: byro/members/models.py:201
+#: byro/members/models.py:203
 msgid "end"
 msgstr "Ende"
 
-#: byro/members/models.py:206
+#: byro/members/models.py:208
 msgid "membership fee"
 msgstr "Beitrag"
 
-#: byro/members/models.py:207
+#: byro/members/models.py:209
 msgid "The amount to be paid in the chosen interval"
 msgstr "Der Beitrag, der im angegebenen Intervall gezahlt werden soll"
 
-#: byro/members/models.py:211
+#: byro/members/models.py:213
 msgid "payment interval"
 msgstr "Intervall"
 
-#: byro/members/models.py:212
+#: byro/members/models.py:214
 msgid "How often does the member pay their fees?"
 msgstr "Wie oft soll das Mitglied zahlen?"
 
-#: byro/members/models.py:215
+#: byro/members/models.py:217
 msgid "Membership"
 msgstr "Mitgliedschaft"
 
@@ -790,7 +790,7 @@ msgstr ""
 "Diese E-Mail wurde schon verschickt und kann nicht mehr verändert werden. "
 "Kopiere sie stattdessen in einen Entwurf."
 
-#: byro/office/views/mails.py:20 byro/office/views/members.py:176
+#: byro/office/views/mails.py:20 byro/office/views/members.py:183
 msgid "Your changes have been saved."
 msgstr "Deine Änderungen wurden gespeichert."
 
@@ -816,13 +816,17 @@ msgstr "Die Mail wurde verschickt."
 msgid "No mail has been sent."
 msgstr "Keine Mail wurde verschickt."
 
-#: byro/office/views/members.py:82 byro/office/views/members.py:234
+#: byro/office/views/members.py:82 byro/office/views/members.py:241
 msgid "Some post processing steps could not be completed: "
 msgstr ""
 "Einige Schritte konnten nach dem Hinzufügen des Mitglieds nicht durchgeführt "
 "werden: "
 
-#: byro/office/views/members.py:229
+#: byro/office/views/members.py:156
+msgid "Some form fields could not be fetched: "
+msgstr "Einige Formularfelder konnten nicht abgerufen werden: "
+
+#: byro/office/views/members.py:236
 msgid ""
 "The membership has been terminated. Please check the outbox for the "
 "notifications."

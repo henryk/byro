@@ -13,7 +13,7 @@ from byro.common.models import Configuration
 from byro.members.forms import CreateMemberForm
 from byro.members.models import Member, Membership
 from byro.members.signals import (
-    leave_member, leave_member_mail_information,
+    edit_member_form, leave_member, leave_member_mail_information,
     leave_member_office_mail_information, new_member,
     new_member_mail_information, new_member_office_mail_information,
 )
@@ -150,9 +150,16 @@ class MemberDataView(MemberView):
         membership_create_form = forms.modelform_factory(Membership, fields=['start', 'end', 'interval', 'amount'])
         for key in membership_create_form.base_fields:
             setattr(membership_create_form.base_fields[key], 'required', False)
+        additional_forms = []
+        responses = edit_member_form.send_robust(sender=obj, instantiate=self._instantiate)
+        for module, response in responses:
+            if isinstance(response, Exception):
+                messages.warning(self.request, _('Some form fields could not be fetched: ') + str(response))
+            else:
+                additional_forms.extend(response)
         return [
             self._instantiate(forms.modelform_factory(Member, exclude=['membership_type']), member=obj, instance=obj),
-        ] + [
+        ] + additional_forms + [
             self._instantiate(forms.modelform_factory(Membership, exclude=['member']), member=obj, instance=m, prefix=m.id)
             for m in obj.memberships.all()
         ] + [self._instantiate(membership_create_form, member=obj, profile_class=Membership, empty=True)] + [

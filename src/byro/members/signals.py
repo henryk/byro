@@ -12,6 +12,13 @@ notifying the office about the new member.
 """
 new_member = django.dispatch.Signal()
 """
+Receives the member as signal. Response will be appended to the member edit
+data form.
+Parameters:
+ + instantiate: Helper function to instantiate a form class with data.
+"""
+edit_member_form = django.dispatch.Signal()
+"""
 Receives the new member as signal. If an exception is raised, the error
 message will be displayed in the frontend as a warning.
 """
