@@ -14,7 +14,7 @@ from byro.members.forms import CreateMemberForm
 from byro.members.models import Member, Membership
 from byro.members.signals import (
     edit_member_form, leave_member, leave_member_mail_information,
-    leave_member_office_mail_information, new_member,
+    leave_member_office_mail_information, member_contacts, new_member,
     new_member_mail_information, new_member_office_mail_information,
 )
 from byro.office.signals import member_view
@@ -252,7 +252,17 @@ class MemberLeaveView(MemberView, FormView):
                     }
                     responses = [r[1] for r in leave_member_mail_information.send_robust(sender=form.instance) if r]
                     context['additional_information'] = '\n'.join(responses).strip()
-                    config.leave_member_template.to_mail(email=form.instance.member.email, context=context)
+                    if form.instance.member.email:
+                        config.leave_member_template.to_mail(email=form.instance.member.email, context=context)
+                    contact_responses = member_contacts.send_robust(sender=form.instance.member,
+                                                                    generic_contact=False, administrative_contact=True, billing_contact=False)
+                    for module, response in contact_responses:
+                        if isinstance(response, Exception):
+                            messages.warning(self.request, _('Some e-mail contact information could not be retrieved: ') + str(response))
+                        else:
+                            for contact_response in response:
+                                if contact_response.get('email', None):
+                                    config.leave_member_template.to_mail(email=contact_response['email'], context=context)
                 if config.leave_office_template:
                     context = {
                         'member_name': form.instance.member.name,

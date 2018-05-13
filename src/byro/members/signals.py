@@ -19,6 +19,15 @@ Parameters:
 """
 edit_member_form = django.dispatch.Signal()
 """
+Receives the member as signal. Response should be a list of
+byro.common.models.contact.Contact instances (either EMailContact or SnailMailContact).
+Parameters:
+ + generic_contact: Boolean, want generic contact information
+ + administrative_contact: Boolean, want administrative contact information
+ + billing_contact: Boolean, want billing contact information
+"""
+member_contacts = django.dispatch.Signal()
+"""
 Receives the new member as signal. If an exception is raised, the error
 message will be displayed in the frontend as a warning.
 """
