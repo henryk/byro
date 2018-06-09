@@ -32,8 +32,8 @@
                     {% endif %}
                 </a></td>
                 <td>{{ account.get_account_category_display }}</td>
-                <td class="text-md-right">{{ account.total_in }}</td>
-                <td class="text-md-right">{{ account.total_out }}</td>
+                <td class="text-md-right">{{ account.total_debit }}</td>
+                <td class="text-md-right">{{ account.total_credit }}</td>
                 <td class="text-md-right">{{ account.balance }}</td>
             </tr>
         {% endfor %}

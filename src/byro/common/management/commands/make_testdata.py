@@ -4,8 +4,9 @@ from dateutil.relativedelta import relativedelta
 from django.core.management.base import BaseCommand
 from django.db import transaction
 from django.utils.timezone import now
+from django.utils.translation import ugettext_lazy as _
 
-from byro.bookkeeping.models import Account, VirtualTransaction
+from byro.bookkeeping.models import Account, AccountCategory, Transaction, BookingType
 from byro.common.models.configuration import Configuration
 from byro.members.models import FeeIntervals, Member, Membership, MembershipType
 
@@ -33,18 +34,36 @@ class Command(BaseCommand):
         config.backoffice_mail = 'vorstanz@dervereindervere.in'
         config.save()
 
+    def create_accounts(self):
+        "Make sure there's at least one asset account that is not member fees receivable"
+        account = self.bank_account
+        if not account:
+            Account.objects.create(
+                account_category=AccountCategory.ASSET,
+                name=_("Demo bank account")
+            )
+
+    @property
+    def bank_account(self):
+        config = Configuration.get_solo()
+        return Account.objects\
+            .filter(account_category=AccountCategory.ASSET)\
+            .exclude(pk=config.fees_receivable_account.pk)\
+            .first()
+
     def make_paid(self, member, vaguely=False, overly=False):
+        config = Configuration.get_solo()
         member.update_liabilites()
-        account = Account.objects.filter(account_category='member_fees').first()
-        for index, liability in enumerate(member.transactions.filter(value_datetime__lte=now(), source_account__account_category='member_fees')):
+        src_account = config.fees_receivable_account
+        dst_account = self.bank_account
+        for index, liability in enumerate(member.bookings.filter(account=src_account, booking_type=BookingType.DEBIT, transaction__value_datetime__lte=now()).all()):
             if vaguely and index % 2 == 0:
                 continue
-            VirtualTransaction.objects.create(
-                destination_account=account,
-                amount=liability.amount if not overly else liability.amount * 2,
-                value_datetime=liability.value_datetime,
-                member=member,
-            )
+            amount=liability.amount if not overly else liability.amount * 2
+            t = Transaction.objects.create(text=_("Fee is paid"), value_datetime=liability.transaction.value_datetime)
+            t.debit(account=dst_account, member=member, amount=amount)
+            t.credit(account=src_account, member=member, amount=amount)
+            t.save()
 
     def create_membership_types(self):
         MembershipType.objects.create(name='Standard membership', amount=120)
@@ -132,5 +151,6 @@ class Command(BaseCommand):
     @transaction.atomic()
     def handle(self, *args, **options):
         self.create_configs()
+        self.create_accounts()
         self.create_membership_types()
         self.create_members()
