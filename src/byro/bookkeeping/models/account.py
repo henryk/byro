@@ -10,10 +10,6 @@ from .transaction import BookingType
 
 
 class AccountCategory(Choices):
-    # Regular Categories
-    MEMBER_DONATION = 'member_donation'  # deprecated
-    MEMBER_FEES = 'member_fees'  # deprecated
-
     # Categories for double-entry bookkeeping
     ASSET = 'asset'  # de: Aktiva, for example your bank account or cash
     LIABILITY = 'liability'  # de: Passiva, for example invoices you have to pay
@@ -24,8 +20,6 @@ class AccountCategory(Choices):
     @classproperty
     def choices(cls):
         return (
-            (cls.MEMBER_DONATION, _('Donation account')),
-            (cls.MEMBER_FEES, _('Membership fee account')),
             (cls.ASSET, _('Asset account')),
             (cls.LIABILITY, _('Liability account')),
             (cls.INCOME, _('Income account')),
@@ -49,22 +43,28 @@ class Account(Auditable, models.Model):
     def __str__(self):
         if self.name:
             return self.name
-        return '{self.account_category} account #{self.id}'.format(self=self)
+        for category, name in AccountCategory.choices:
+            if category == self.account_category:
+                return "{translated_type} #{id}".format(
+                    translated_type=name,
+                    id=self.id
+                )
+        return "account #{id}".format(id=self.id)
 
     def _aggregate_by_date(self, qs, start, end):
         if start:
-            qs = qs.filter(value_datetime__gte=start)
+            qs = qs.filter(transaction__value_datetime__gte=start)
         if end:
-            qs = qs.filter(value_datetime__lte=end)
+            qs = qs.filter(transaction__value_datetime__lte=end)
         return qs.aggregate(total=models.Sum('amount'))['total'] or 0
 
     @property
     def credits(self):
-        return self.transactions.filter(booking_type=BookingType.credit)
+        return self.bookings.filter(booking_type=BookingType.CREDIT)
 
     @property
     def debits(self):
-        return self.transactions.filter(booking_type=BookingType.debit)
+        return self.bookings.filter(booking_type=BookingType.DEBIT)
 
     def total_credit(self, start=None, end=now()):
         return self._aggregate_by_date(self.credits, start=start, end=end)

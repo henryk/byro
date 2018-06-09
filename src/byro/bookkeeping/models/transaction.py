@@ -33,27 +33,39 @@ class Transaction(Auditable, models.Model):
         null=True,
     )
 
+    def total_credit(self):
+        return self.bookings.filter(BookingType.CREDIT).aggregate(total=models.Sum('amount'))['total'] or 0
+
+    def total_debit(self):
+        return self.bookings.filter(BookingType.DEBIT).aggregate(total=models.Sum('amount'))['total'] or 0
+
+    def is_balanced(self):
+        return self.total_credit() == self.total_debit()
+
 
 class Booking(Auditable, models.Model):
     transaction = models.ForeignKey(
         to='bookkeeping.Transaction',
         related_name='bookings',
-        on_delete=models.PROTECT,
+        on_delete=models.CASCADE,
+        null=False,
     )
     account = models.ForeignKey(
         to='bookkeeping.Account',
         related_name='bookings',
-        on_delete=models.PROTECT,
+        on_delete=models.CASCADE,
+        null=False,
     )
     member = models.ForeignKey(
         to='members.Member',
         related_name='bookings',
-        on_delete=models.PROTECT,
+        on_delete=models.CASCADE,
         null=True
     )
     booking_type = models.CharField(
         choices=BookingType.choices,
         max_length=BookingType.max_length,
+        null=False, blank=False,
     )
     amount = models.DecimalField(
         max_digits=8, decimal_places=2,  # TODO: enforce min_value = 0

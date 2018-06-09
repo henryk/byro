@@ -5,7 +5,7 @@ from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic import DetailView, FormView, ListView
 
-from byro.bookkeeping.models import Account, VirtualTransaction
+from byro.bookkeeping.models import Account, Transaction
 
 FORM_CLASS = forms.modelform_factory(Account, fields=['name', 'account_category'])
 
@@ -34,7 +34,7 @@ class AccountCreateView(FormView):
 class AccountDetailView(ListView):
     template_name = 'office/account/detail.html'
     context_object_name = 'transactions'
-    model = VirtualTransaction
+    model = Transaction
     paginate_by = 25
 
     def get_object(self):

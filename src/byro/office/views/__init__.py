@@ -6,7 +6,6 @@ from .members import (
     MemberCreateView, MemberDashboardView, MemberDataView,
     MemberFinanceView, MemberLeaveView, MemberListView,
 )
-from .realtransactions import RealTransactionListView
 from .settings import ConfigurationView, RegistrationConfigView
 from .users import UserCreateView, UserDetailView, UserListView
 
@@ -27,5 +26,4 @@ __all__ = [
     'UserCreateView',
     'UserDetailView',
     'RegistrationConfigView',
-    'RealTransactionListView',
 ]
