@@ -1,11 +1,12 @@
 from django.db import models
-from django.db.models import Q
 from django.utils.decorators import classproperty
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
 from byro.common.models.auditable import Auditable
 from byro.common.models.choices import Choices
+
+from .transaction import BookingType
 
 
 class AccountCategory(Choices):
@@ -18,6 +19,7 @@ class AccountCategory(Choices):
     LIABILITY = 'liability'  # de: Passiva, for example invoices you have to pay
     INCOME = 'income'  # de: Ertragskonten, for example for fees paid
     EXPENSE = 'expense'  # de: Aufwandskonten, for example for fees to be paid
+    EQUITY = 'equity'  # de: Eigenkapital, your assets without liabilities
 
     @classproperty
     def choices(cls):
@@ -28,6 +30,7 @@ class AccountCategory(Choices):
             (cls.LIABILITY, _('Liability account')),
             (cls.INCOME, _('Income account')),
             (cls.EXPENSE, _('Expense account')),
+            (cls.EQUITY, _('Equity account')),
         )
 
 
@@ -48,13 +51,6 @@ class Account(Auditable, models.Model):
             return self.name
         return '{self.account_category} account #{self.id}'.format(self=self)
 
-    @property
-    def transactions(self):
-        from byro.bookkeeping.models import VirtualTransaction
-        return VirtualTransaction.objects.filter(
-            Q(source_account=self) | Q(destination_account=self)
-        )
-
     def _aggregate_by_date(self, qs, start, end):
         if start:
             qs = qs.filter(value_datetime__gte=start)
@@ -62,13 +58,26 @@ class Account(Auditable, models.Model):
             qs = qs.filter(value_datetime__lte=end)
         return qs.aggregate(total=models.Sum('amount'))['total'] or 0
 
-    def total_in(self, start=None, end=now()):
-        return self._aggregate_by_date(self.incoming_transactions, start=start, end=end)
+    @property
+    def credits(self):
+        return self.transactions.filter(booking_type=BookingType.credit)
 
-    def total_out(self, start=None, end=now()):
-        return self._aggregate_by_date(self.outgoing_transactions, start=start, end=end)
+    @property
+    def debits(self):
+        return self.transactions.filter(booking_type=BookingType.debit)
+
+    def total_credit(self, start=None, end=now()):
+        return self._aggregate_by_date(self.credits, start=start, end=end)
+
+    def total_debit(self, start=None, end=now()):
+        return self._aggregate_by_date(self.debits, start=start, end=end)
 
     def balance(self, start=None, end=now()):
-        incoming_sum = self.total_in(start=start, end=end)
-        outgoing_sum = self.total_out(start=start, end=end)
-        return incoming_sum - outgoing_sum
+        credit_sum = self.total_credit(start=start, end=end)
+        debit_sum = self.total_debit(start=start, end=end)
+        if self.account_category in (AccountCategory.ASSET, AccountCategory.EXPENSE):
+            return debit_sum - credit_sum
+        elif self.account_category in (AccountCategory.LIABILITY, AccountCategory.INCOME, AccountCategory.EQUITY):
+            return credit_sum - debit_sum
+        else:
+            return 0
