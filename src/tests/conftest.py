@@ -31,7 +31,7 @@ def member():
     yield member
 
     [profile.delete() for profile in member.profiles]
-    member.transactions.all().delete()
+    [booking.transaction.delete() for booking in member.bookings.all()]
     member.delete()
 
 
@@ -66,7 +66,7 @@ def inactive_member():
     )
     yield member
     [profile.delete() for profile in member.profiles]
-    member.transactions.all().delete()
+    [booking.transaction.delete() for booking in member.bookings.all()]
     member.delete()
 
 

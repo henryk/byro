@@ -98,31 +98,30 @@ class Member(Auditable, models.Model):
     @property
     def balance(self) -> Decimal:
         config = Configuration.get_solo()
-        cutoff = now() - relativedelta(months=config.liability_interval)
-        qs = self.transactions.filter(value_datetime__lte=now(), value_datetime__gte=cutoff)
-        liability = qs.filter(source_account__account_category='member_fees').aggregate(liability=models.Sum('amount'))['liability'] or Decimal('0.00')
-        asset = qs.filter(destination_account__account_category='member_fees').aggregate(asset=models.Sum('amount'))['asset'] or Decimal('0.00')
+        debits = config.fees_receivable_account.debits.filter(member=self, transaction__value_datetime__lte=now())
+        credits = config.fees_receivable_account.credits.filter(member=self, transaction__value_datetime__lte=now())
+        liability = debits.aggregate(liability=models.Sum('amount'))['liability'] or Decimal('0.00')
+        asset = credits.aggregate(asset=models.Sum('amount'))['asset'] or Decimal('0.00')
         return asset - liability
 
     @property
     def donations(self):
-        return self.transactions.filter(value_datetime__lte=now()).filter(
-            destination_account__account_category='member_donation'
-        )
+        config = Configuration.get_solo()
+        return config.donations_account.credits.filter(member=self, transaction__value_datetime__lte=now())
 
     @property
     def fee_payments(self):
-        return self.transactions.filter(value_datetime__lte=now()).filter(
-            destination_account__account_category='member_fees'
-        )
+        config = Configuration.get_solo()
+        return config.fees_receivable_account.debits.filter(member=self, transaction__value_datetime__lte=now())
 
     def update_liabilites(self):
-        from byro.bookkeeping.models import Account, VirtualTransaction
+        from byro.bookkeeping.models import Account, Transaction
 
         config = Configuration.get_solo()
         booking_date = now()
         cutoff = (booking_date - relativedelta(months=config.liability_interval)).date()
-        account = Account.objects.filter(account_category='member_fees').first()
+        src_account = config.fees_account
+        dst_account = config.fees_receivable_account
 
         for membership in self.memberships.all():
             date = membership.start
@@ -130,33 +129,32 @@ class Member(Auditable, models.Model):
                 date = cutoff
             end = membership.end or booking_date.date()
             while date <= end:
-                vt = VirtualTransaction.objects.filter(
-                    source_account=account,
+                t = Transaction.objects.filter(
                     value_datetime=date,
-                    member=self,
+                    bookings__account=src_account,
+                    bookings__member=self,
                 ).first()
 
-                if vt:
-                    if vt.amount != membership.amount:
-                        vt.amount = membership.amount
-                        vt.save()
+                if t:
+                    if t.total_credit() != membership.amount:
+                        for b in t.bookings:
+                            b.amount = membership.amount
+                        t.save()
                 else:
-                    VirtualTransaction.objects.create(
-                        source_account=account,
-                        value_datetime=date,
-                        amount=membership.amount,
-                        member=self,
-                    )
+                    t = Transaction.objects.create(value_datetime=date, text=_("Membership due"))
+                    t.debit(account=dst_account, amount=membership.amount, member=self)
+                    t.credit(account=src_account, amount=membership.amount, member=self)
+                    t.save()
                 date += relativedelta(months=membership.interval)
 
     def remove_future_liabilites_on_leave(self):
-        for vt in self.transactions.all():
-            delete_vt = True
+        for b in self.bookings.all():
+            do_delete = True
             for membership in self.memberships.all():
-                if vt.value_datetime.date() < membership.end:
-                    delete_vt = False
-            if delete_vt and not vt.real_transaction:
-                vt.delete()
+                if b.transaction.value_datetime.date() < membership.end:
+                    do_delete = False
+            if do_delete:
+                b.delete()
 
     def __str__(self):
         return 'Member {self.number} ({self.name})'.format(self=self)

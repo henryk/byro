@@ -78,3 +78,10 @@ class Booking(Auditable, models.Model):
     )
     data = JSONField(null=True)
     importer = models.CharField(null=True, max_length=500)
+
+    def __str__(self):
+        return "{amount} {booking_type} {account}".format(
+            amount=self.amount,
+            booking_type=self.booking_type,
+            account=self.account,
+        )
