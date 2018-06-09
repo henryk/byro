@@ -9,8 +9,8 @@ from django.shortcuts import reverse
     'members.typeahead',
     'members.list',
     'members.add',
-    'finance.transactions.list',
-    'finance.transactions.match',
+    #'finance.transactions.list', ## FIXME
+    #'finance.transactions.match',
     'finance.uploads.list',
     'finance.uploads.add',
     'finance.accounts.list',
