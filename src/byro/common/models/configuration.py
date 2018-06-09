@@ -91,3 +91,24 @@ class Configuration(ByroConfiguration):
         on_delete=models.SET_NULL,
         related_name='+',
     )
+
+    fees_account = models.ForeignKey(
+        to='bookkeeping.Account',
+        null=True, blank=True,
+        on_delete=models.SET_NULL,
+        related_name='+',
+    )
+
+    donations_account = models.ForeignKey(
+        to='bookkeeping.Account',
+        null=True, blank=True,
+        on_delete=models.SET_NULL,
+        related_name='+',
+    )
+
+    fees_receivable_account = models.ForeignKey(
+        to='bookkeeping.Account',
+        null=True, blank=True,
+        on_delete=models.SET_NULL,
+        related_name='+',
+    )

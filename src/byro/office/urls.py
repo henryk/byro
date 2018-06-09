@@ -1,9 +1,6 @@
 from django.conf.urls import include, url
 
-from .views import (
-    accounts, dashboard, mails, members,
-    settings, upload, users,
-)
+from .views import accounts, dashboard, mails, members, settings, upload, users
 
 app_name = 'office'
 urlpatterns = [

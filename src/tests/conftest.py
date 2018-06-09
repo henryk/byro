@@ -6,7 +6,7 @@ from django.contrib.auth import get_user_model
 from django.utils.timezone import now
 
 from byro.bookkeeping.models import (
-    Account, AccountCategory, Transaction, Booking,
+    Account, AccountCategory, Booking, Transaction,
 )
 from byro.mails.models import EMail, MailTemplate
 from byro.members.models import FeeIntervals, Member, Membership
@@ -116,4 +116,3 @@ def income_account():
     account = Account.objects.create(account_category=AccountCategory.INCOME)
     yield account
     [booking.transaction.delete() for booking in account.bookings.all()]
-

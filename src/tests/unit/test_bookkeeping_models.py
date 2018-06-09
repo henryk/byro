@@ -2,7 +2,7 @@ import pytest
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
-from byro.bookkeeping.models import Transaction, Booking, BookingType
+from byro.bookkeeping.models import Booking, BookingType, Transaction
 
 
 @pytest.mark.django_db
@@ -58,4 +58,3 @@ def test_account_balances(bank_account, receivable_account, income_account):
     assert income_account.balance(end=None) == 10
     assert receivable_account.balance(end=None) == 0
     assert bank_account.balance(end=None) == 10
-

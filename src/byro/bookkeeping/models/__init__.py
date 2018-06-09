@@ -1,6 +1,6 @@
 from .account import Account, AccountCategory
-from .transaction import Transaction, Booking, BookingType
 from .real_transaction import RealTransactionSource
+from .transaction import Booking, BookingType, Transaction
 
 __all__ = (
     'Account',

@@ -3,6 +3,7 @@ from django.db import models
 from byro.common.models.auditable import Auditable
 from byro.common.models.choices import Choices
 
+
 class SourceState(Choices):
     NEW = 'new'
     PROCESSING = 'processing'

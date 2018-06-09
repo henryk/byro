@@ -17,4 +17,3 @@ class connected_signal:
 
     def __exit__(self, exc_type, exc_value, tb):
         self.signal.disconnect(self.receiver, dispatch_uid='test-plugin')
-
