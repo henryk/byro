@@ -34,13 +34,19 @@ class Transaction(Auditable, models.Model):
     )
 
     def total_credit(self):
-        return self.bookings.filter(BookingType.CREDIT).aggregate(total=models.Sum('amount'))['total'] or 0
+        return self.bookings.filter(booking_type=BookingType.CREDIT).aggregate(total=models.Sum('amount'))['total'] or 0
 
     def total_debit(self):
-        return self.bookings.filter(BookingType.DEBIT).aggregate(total=models.Sum('amount'))['total'] or 0
+        return self.bookings.filter(booking_type=BookingType.DEBIT).aggregate(total=models.Sum('amount'))['total'] or 0
 
     def is_balanced(self):
         return self.total_credit() == self.total_debit()
+
+    def debit(self, *args, **kwargs):
+        return Booking.objects.create(transaction=self, booking_type=BookingType.DEBIT, *args, **kwargs)
+
+    def credit(self, *args, **kwargs):
+        return Booking.objects.create(transaction=self, booking_type=BookingType.CREDIT, *args, **kwargs)
 
 
 class Booking(Auditable, models.Model):

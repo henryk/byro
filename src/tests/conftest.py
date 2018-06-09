@@ -6,7 +6,7 @@ from django.contrib.auth import get_user_model
 from django.utils.timezone import now
 
 from byro.bookkeeping.models import (
-    Account, AccountCategory, RealTransaction, TransactionChannel,
+    Account, AccountCategory, Transaction, Booking,
 )
 from byro.mails.models import EMail, MailTemplate
 from byro.members.models import FeeIntervals, Member, Membership
@@ -71,18 +71,6 @@ def inactive_member():
 
 
 @pytest.fixture
-def real_transaction():
-    return RealTransaction.objects.create(
-        channel=TransactionChannel.BANK,
-        booking_datetime=now(),
-        value_datetime=now(),
-        amount=decimal.Decimal('20.00'),
-        purpose='Erm, this is my fees for today',
-        originator='Jane Doe',
-    )
-
-
-@pytest.fixture
 def mail_template():
     return MailTemplate.objects.create(
         subject='Test Mail',
@@ -110,5 +98,22 @@ def sent_email():
 
 
 @pytest.fixture
-def fee_account():
-    return Account.objects.create(account_category=AccountCategory.MEMBER_FEES)
+def receivable_account():
+    account = Account.objects.create(account_category=AccountCategory.ASSET)
+    yield account
+    [booking.transaction.delete() for booking in account.bookings.all()]
+
+
+@pytest.fixture
+def bank_account():
+    account = Account.objects.create(account_category=AccountCategory.ASSET, name="bank")
+    yield account
+    [booking.transaction.delete() for booking in account.bookings.all()]
+
+
+@pytest.fixture
+def income_account():
+    account = Account.objects.create(account_category=AccountCategory.INCOME)
+    yield account
+    [booking.transaction.delete() for booking in account.bookings.all()]
+
