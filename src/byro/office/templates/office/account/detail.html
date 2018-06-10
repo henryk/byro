@@ -1,5 +1,6 @@
 {% extends "office/account/base.html" %}
 {% load bootstrap4 %}
+{% load extract_property %}
 {% load i18n %}
 
 {% block account_content %}
@@ -14,29 +15,37 @@
     <thead>
         <tr>
             <th>{% trans "Date" %}</th>
-            <th>{% trans "Member" %}</th>
             <th>{% trans "Purpose" %}</th>
+            <th>{% trans "Member" %}</th>
+            <th>{% trans "Other account" %}</th>
             <th class="text-md-right">{% trans "Incoming" %}</th>
             <th class="text-md-right">{% trans "Outgoing" %}</th>
         </tr>
     </thead>
     <tbody>
-        {% for transaction in transactions %}
-            <tr>
-                <td>{{ transaction.value_datetime.date }}</td>
-                <td>{{ transaction.member.name }}</td>
-                <td>{{ transaction.real_transaction.purpose }}</td>
-                <td class="text-md-right">
-                    {% if transaction.destination_account == account %}
-                        {{ transaction.amount }}
-                    {% endif %}
-                </td>
-                <td class="text-md-right">
-                    {% if transaction.source_account == account %}
-                        {{ transaction.amount }}
-                    {% endif %}
-                </td>
-            </tr>
+        {% for booking in bookings %}
+            {% with transaction=booking.transaction %}
+            {% with related_bookings=transaction.bookings is_balanced=transaction.is_balanced %}
+                <tr class="transaction-{% if not is_balanced %}unbalanced-{% endif %}{% cycle 'row-odd' 'row-even' %}">
+                    <td style="white-space: nowrap;">{{ transaction.value_datetime.date }}</td>
+                    <td>{{ transaction.text }}</td>
+                    <td>{{ booking.member.name }}</td>
+                    <td>
+                        {{ booking.counter_bookings | extract_property:"account" | join:", <br/> "}}
+                    </td>
+                    <td class="text-md-right">
+                        {% if booking.booking_type == BookingType.DEBIT %}
+                            {{ booking.amount }}
+                        {% endif %}
+                    </td>
+                    <td class="text-md-right">
+                        {% if booking.booking_type == BookingType.CREDIT %}
+                            {{ booking.amount }}
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endwith %}
+            {% endwith %}
         {% endfor %}
     </tbody>
 </table>

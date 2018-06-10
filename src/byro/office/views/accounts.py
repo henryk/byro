@@ -5,7 +5,7 @@ from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic import DetailView, FormView, ListView
 
-from byro.bookkeeping.models import Account, Transaction
+from byro.bookkeeping.models import Account, BookingType, Transaction
 
 FORM_CLASS = forms.modelform_factory(Account, fields=['name', 'account_category'])
 
@@ -33,7 +33,7 @@ class AccountCreateView(FormView):
 
 class AccountDetailView(ListView):
     template_name = 'office/account/detail.html'
-    context_object_name = 'transactions'
+    context_object_name = 'bookings'
     model = Transaction
     paginate_by = 25
 
@@ -41,7 +41,7 @@ class AccountDetailView(ListView):
         return Account.objects.get(pk=self.kwargs['pk'])
 
     def get_queryset(self):
-        return self.get_object().transactions.filter(value_datetime__lte=now()).order_by('-value_datetime')
+        return self.get_object().bookings.prefetch_related('transaction').filter(transaction__value_datetime__lte=now()).order_by('-transaction__value_datetime')
 
     def get_form(self):
         return FORM_CLASS(instance=self.get_object(), data=self.request.POST if self.request.method == 'post' else None)
@@ -50,6 +50,7 @@ class AccountDetailView(ListView):
         context = super().get_context_data(*args, **kwargs)
         context['form'] = self.get_form()
         context['account'] = self.get_object()
+        context['BookingType'] = BookingType
         return context
 
 

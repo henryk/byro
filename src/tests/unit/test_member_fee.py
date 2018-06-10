@@ -2,8 +2,8 @@ import pytest
 from dateutil.relativedelta import relativedelta
 from django.utils import timezone
 
+from byro.bookkeeping.models import BookingType, Transaction
 from byro.members.models import FeeIntervals, Member, Membership
-from byro.bookkeeping.models import Transaction, BookingType
 
 
 @pytest.fixture

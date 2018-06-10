@@ -9,6 +9,7 @@ from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic import DetailView, FormView, ListView, View
 
+from byro.bookkeeping.models import BookingType
 from byro.common.models import Configuration
 from byro.members.forms import CreateMemberForm
 from byro.members.models import Member, Membership
@@ -185,17 +186,18 @@ class MemberFinanceView(MemberView):
     def get_member(self):
         return Member.all_objects.get(pk=self.kwargs['pk'])
 
-    def get_transactions(self):
-        return self.get_member().transactions.filter(
-            Q(destination_account__account_category='member_fees') |
-            Q(destination_account__account_category='member_donation'),
-            value_datetime__lte=now(),
-        ).order_by('-value_datetime')
+    def get_bookings(self):
+        config = Configuration.get_solo()
+        return self.get_member().bookings.filter(
+            Q(account=config.fees_receivable_account, booking_type=BookingType.CREDIT) |
+            Q(account=config.donations_account, booking_type=BookingType.CREDIT),
+            transaction__value_datetime__lte=now(),
+        ).order_by('-transaction__value_datetime')
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
         context['member'] = self.get_member()
-        context['transactions'] = self.get_transactions()
+        context['bookings'] = self.get_bookings()
         return context
 
 

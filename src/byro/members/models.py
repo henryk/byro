@@ -105,6 +105,10 @@ class Member(Auditable, models.Model):
         return asset - liability
 
     @property
+    def donation_balance(self) -> Decimal:
+        return self.donations.aggregate(donations=models.Sum('amount'))['donations'] or Decimal('0.00')
+
+    @property
     def donations(self):
         config = Configuration.get_solo()
         return config.donations_account.credits.filter(member=self, transaction__value_datetime__lte=now())

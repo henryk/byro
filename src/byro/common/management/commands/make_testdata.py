@@ -6,7 +6,9 @@ from django.db import transaction
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
-from byro.bookkeeping.models import Account, AccountCategory, Transaction, BookingType
+from byro.bookkeeping.models import (
+    Account, AccountCategory, BookingType, Transaction,
+)
 from byro.common.models.configuration import Configuration
 from byro.members.models import FeeIntervals, Member, Membership, MembershipType
 
@@ -51,18 +53,37 @@ class Command(BaseCommand):
             .exclude(pk=config.fees_receivable_account.pk)\
             .first()
 
-    def make_paid(self, member, vaguely=False, overly=False):
+    def make_paid(self, member, vaguely=False, overly=False, donates=0, pays_for=None):
         config = Configuration.get_solo()
         member.update_liabilites()
-        src_account = config.fees_receivable_account
-        dst_account = self.bank_account
-        for index, liability in enumerate(member.bookings.filter(account=src_account, booking_type=BookingType.DEBIT, transaction__value_datetime__lte=now()).all()):
+        for index, liability in enumerate(member.bookings.filter(account=config.fees_receivable_account, booking_type=BookingType.DEBIT, transaction__value_datetime__lte=now()).all()):
             if vaguely and index % 2 == 0:
                 continue
-            amount=liability.amount if not overly else liability.amount * 2
-            t = Transaction.objects.create(text=_("Fee is paid"), value_datetime=liability.transaction.value_datetime)
-            t.debit(account=dst_account, member=member, amount=amount)
-            t.credit(account=src_account, member=member, amount=amount)
+            
+            pure_amount=liability.amount if not overly else liability.amount * 2
+
+            text = _("Member fee for {number}").format(number=member.number)
+
+            if pays_for:
+                amount = pure_amount * 2
+                text += ", " + _("and for {number}").format(number=pays_for.number)
+            else:
+                amount = pure_amount
+
+            if donates:
+                amount += donates
+                text += ", " + _("EUR {amount} donation").format(amount=donates)
+            
+            t = Transaction.objects.create(
+                text=text,
+                value_datetime=liability.transaction.value_datetime
+            )
+            t.debit(account=self.bank_account, amount=amount)
+            if donates:
+                t.credit(account=config.donations_account, member=member, amount=donates)
+            t.credit(account=config.fees_receivable_account, member=member, amount=pure_amount)
+            if pays_for:
+                t.credit(account=config.fees_receivable_account, member=pays_for, amount=pure_amount)
             t.save()
 
     def create_membership_types(self):
@@ -147,6 +168,86 @@ class Command(BaseCommand):
             interval=FeeIntervals.MONTHLY,
             amount=10,
         )
+        giver = Member.objects.create(
+            number='7',
+            name='George Giver',
+            address='Generous St 3\nEnd-of-the-rainbow Heath',
+            email='george@group.org',
+        )
+        Membership.objects.create(
+            member=giver,
+            start=make_date(relativedelta(years=1)),
+            interval=FeeIntervals.MONTHLY,
+            amount=10,
+        )
+        self.make_paid(giver, donates=5)
+        is_payed_for = Member.objects.create(
+            number='8',
+            name='Peter Partner',
+            address='Commune St 3\nFamily Shire',
+            email='peter@group.org',
+        )
+        Membership.objects.create(
+            member=is_payed_for,
+            start=make_date(relativedelta(months=3)),
+            interval=FeeIntervals.MONTHLY,
+            amount=10,
+        )
+        is_payed_for.update_liabilites()
+        pays_other = Member.objects.create(
+            number='9',
+            name='Aaron Alsopayer',
+            address='Commune St 3\nFamily Shire',
+            email='aaron@group.org',
+        )
+        Membership.objects.create(
+            member=pays_other,
+            start=make_date(relativedelta(months=3)),
+            interval=FeeIntervals.MONTHLY,
+            amount=10,
+        )
+        self.make_paid(pays_other, pays_for=is_payed_for)
+
+    def create_bank_chaff(self):
+        "Create some dummy traffic, and a couple of unmatched transactions on the bank account"
+        bank_account = self.bank_account
+        
+        t = Transaction.objects.create(
+            text=_("Belated member fee payment for Olga"),
+            value_datetime=(now()-relativedelta(days=23)).date(),
+        )
+        t.debit(account=bank_account, amount=20)
+        t.save()
+
+        t = Transaction.objects.create(
+            text=_("George lives to give, donation"),
+            value_datetime=(now()-relativedelta(days=17)).date(),
+        )
+        t.debit(account=bank_account, amount=42.23)
+        t.save()
+
+        for i in range(1,4):
+            t = Transaction.objects.create(
+                text=_("Bank fees"),
+                value_datetime=(now()-relativedelta(months=i)).date(),
+            )
+            t.credit(account=bank_account, amount=9.95)
+            t.save()
+
+        t = Transaction.objects.create(
+            text=_("ACME Inc. thanks you for your patronage, sale of one halo kite"),
+            value_datetime=(now()-relativedelta(days=21)).date(),
+        )
+        t.credit(account=bank_account, amount=123)
+        t.save()
+
+        t = Transaction.objects.create(
+            text=_("ACME Inc. thanks you for your patronage, sale of one emergency medkit"),
+            value_datetime=(now()-relativedelta(days=20)).date(),
+        )
+        t.credit(account=bank_account, amount=666)
+        t.save()
+
 
     @transaction.atomic()
     def handle(self, *args, **options):
@@ -154,3 +255,4 @@ class Command(BaseCommand):
         self.create_accounts()
         self.create_membership_types()
         self.create_members()
+        self.create_bank_chaff()
