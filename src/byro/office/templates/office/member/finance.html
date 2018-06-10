@@ -19,7 +19,7 @@
             <tr class="transaction {% if not booking.transaction.is_balanced %}unmatched{% endif %}">
                 <td>{{ booking.transaction.value_datetime.date }}</td>
                 <td class="text-md-right{% if booking.amount < 0 %} text-danger{% endif %}">{{ booking.amount }}</td>
-                <td>{{ booking.transaction.text }}</td>
+                <td>{{ booking.transaction.find_memo }}</td>
                 <td>{{ booking.account }}</td>
             </tr>
         {% endfor %}
