@@ -1,6 +1,6 @@
 from django.conf.urls import include, url
 
-from .views import accounts, dashboard, mails, members, settings, upload, users
+from .views import accounts, dashboard, mails, members, settings, transactions, upload, users
 
 app_name = 'office'
 urlpatterns = [
@@ -20,6 +20,8 @@ urlpatterns = [
         url('leave$', members.MemberLeaveView.as_view(), name='members.leave'),
         url('$', members.MemberDashboardView.as_view(), name='members.dashboard'),
     ])),
+
+    url(r'^transactions/(?P<pk>\d+)/', transactions.TransactionDetailView.as_view(), name='finance.transactions.detail'),
 
     url('^upload/list', upload.UploadListView.as_view(), name='finance.uploads.list'),
     url(r'^upload/process/(?P<pk>\d+)', upload.UploadProcessView.as_view(), name='finance.uploads.process'),

@@ -14,6 +14,7 @@
 <table class="table table-sm">
     <thead>
         <tr>
+            <th></th>
             <th>{% trans "Date" %}</th>
             <th>{% trans "Purpose" %}</th>
             <th>{% trans "Member" %}</th>
@@ -27,6 +28,13 @@
             {% with transaction=booking.transaction %}
             {% with related_bookings=transaction.bookings.all is_balanced=transaction.is_balanced %}
                 <tr class="transaction-{% if not is_balanced %}unbalanced-{% endif %}{% cycle 'row-odd' 'row-even' as account_row %}">
+                    {% if is_balanced %}
+                        <td></td>
+                    {% else %}
+                        <td>
+                            <a href="{% url "office:finance.transactions.detail" pk=transaction.pk %}?in_account={{account.pk}}"><span class="fa fa-pencil"></span></a>
+                        </td>
+                    {% endif %}
                     <td style="white-space: nowrap;">{{ transaction.value_datetime.date }}</td>
                     <td>
                         <a data-toggle="collapse" data-target=".collapse-{{transaction.id}}" aria-controls="collapse-{{transaction.id}}">
@@ -51,6 +59,7 @@
                 </tr>
                 {% for related_booking in related_bookings %}
                 <tr class="collapse in related-{{ account_row }}-{% cycle 'related-odd' 'related-even' as related_row %} collapse-{{transaction.id}} {% if forloop.first %}related-first{% endif %} {% if forloop.last %}related-last{% endif %}">
+                    <td class="related-empty"></td>
                     <td class="related-empty"></td>
                     <td>{{ related_booking.memo|default:"" }}</td>
                     <td>{{ related_booking.member.name }}</td>
