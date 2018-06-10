@@ -24,6 +24,7 @@ def make_date(delta, end=False):
 
 class Command(BaseCommand):
     help = "Introduce test data, including members and payments"
+    leave_locale_alone = True
 
     def create_configs(self):
         config = Configuration.get_solo()

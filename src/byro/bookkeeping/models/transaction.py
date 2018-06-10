@@ -14,8 +14,8 @@ class BookingType(Choices):
     @classproperty
     def choices(cls):
         return (
-            (cls.DEBIT, _('Soll')),
-            (cls.CREDIT, _('Haben')),
+            (cls.DEBIT, _('Debit')),
+            (cls.CREDIT, _('Credit')),
         )
 
 
