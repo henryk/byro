@@ -41,7 +41,11 @@ class AccountDetailView(ListView):
         return Account.objects.get(pk=self.kwargs['pk'])
 
     def get_queryset(self):
-        return self.get_object().bookings.prefetch_related('transaction').filter(transaction__value_datetime__lte=now()).order_by('-transaction__value_datetime')
+        qs = self.get_object().bookings
+        if self.request.GET.get('filter') == 'unbalanced':
+            qs = qs.filter(transaction__in=self.get_object().unbalanced_transactions)
+        qs = qs.prefetch_related('transaction').filter(transaction__value_datetime__lte=now()).order_by('-transaction__value_datetime')
+        return qs
 
     def get_form(self):
         return FORM_CLASS(instance=self.get_object(), data=self.request.POST if self.request.method == 'post' else None)
