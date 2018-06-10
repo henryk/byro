@@ -13,6 +13,9 @@
 <table class="table table-sm">
     <thead>
         <tr>
+            {% if pending_transactions %}
+            <th class="table-column-small">{% trans "Unmatched transactions" %}</th>
+            {% endif %}
             <th>{% trans "Name" %}</th>
             <th>{% trans "Type" %}</th>
             <th class="text-md-right">{% trans "Incoming" %}</th>
@@ -23,6 +26,15 @@
     <tbody>
         {% for account in accounts %}
             <tr>
+                {% if pending_transactions %}
+                    {% with pending_count=account.unbalanced_transactions.count %}
+                    <td class="{% if pending_count %}table-warning{% endif %}">
+                        <a href="{% url "office:finance.accounts.detail" pk=account.pk %}?filter=unbalanced">
+                            {{ pending_count }}
+                        </a>
+                    </td>
+                    {% endwith %}
+                {% endif %}
                 <td><a href="{% url "office:finance.accounts.detail" pk=account.pk %}">
                     {% if account.name %}
                         {{ account.name }}
@@ -32,8 +44,8 @@
                     {% endif %}
                 </a></td>
                 <td>{{ account.get_account_category_display }}</td>
-                <td class="text-md-right">{{ account.total_debit }}</td>
-                <td class="text-md-right">{{ account.total_credit }}</td>
+                <td class="text-md-right">{{ account.total_debit|default:"" }}</td>
+                <td class="text-md-right">{{ account.total_credit|default:"" }}</td>
                 <td class="text-md-right">{{ account.balance }}</td>
             </tr>
         {% endfor %}

@@ -56,6 +56,24 @@ class Transaction(Auditable, models.Model):
     def credit(self, *args, **kwargs):
         return Booking.objects.create(transaction=self, booking_type=BookingType.CREDIT, *args, **kwargs)
 
+    @classproperty
+    def with_balance(cls):
+        qs = cls.objects.all()
+        qs = qs.annotate(
+            transaction_balance=models.Sum(
+                models.Case(
+                    models.When(bookings__booking_type=BookingType.DEBIT, then="bookings__amount"),
+                    models.When(bookings__booking_type=BookingType.CREDIT, then=0-models.F("bookings__amount")),
+                    output_field=models.IntegerField()
+                )
+            )
+        )
+        return qs
+
+    @classproperty
+    def unbalanced_transactions(cls):
+        return cls.with_balance.exclude(transaction_balance=0)
+
 
 class Booking(Auditable, models.Model):
     transaction = models.ForeignKey(

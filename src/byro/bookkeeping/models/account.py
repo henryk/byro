@@ -6,7 +6,7 @@ from django.utils.translation import ugettext_lazy as _
 from byro.common.models.auditable import Auditable
 from byro.common.models.choices import Choices
 
-from .transaction import BookingType
+from .transaction import Transaction, BookingType
 
 
 class AccountCategory(Choices):
@@ -81,3 +81,7 @@ class Account(Auditable, models.Model):
             return credit_sum - debit_sum
         else:
             return 0
+
+    @property
+    def unbalanced_transactions(self):
+        return Transaction.unbalanced_transactions.filter(bookings__account=self)
