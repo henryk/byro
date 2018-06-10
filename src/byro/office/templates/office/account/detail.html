@@ -17,7 +17,7 @@
             <th>{% trans "Date" %}</th>
             <th>{% trans "Purpose" %}</th>
             <th>{% trans "Member" %}</th>
-            <th>{% trans "Other account" %}</th>
+            <th>{% trans "Account" %}</th>
             <th class="text-md-right">{% trans "Incoming" %}</th>
             <th class="text-md-right">{% trans "Outgoing" %}</th>
         </tr>
@@ -25,10 +25,15 @@
     <tbody>
         {% for booking in bookings %}
             {% with transaction=booking.transaction %}
-            {% with related_bookings=transaction.bookings is_balanced=transaction.is_balanced %}
-                <tr class="transaction-{% if not is_balanced %}unbalanced-{% endif %}{% cycle 'row-odd' 'row-even' %}">
+            {% with related_bookings=transaction.bookings.all is_balanced=transaction.is_balanced %}
+                <tr class="transaction-{% if not is_balanced %}unbalanced-{% endif %}{% cycle 'row-odd' 'row-even' as account_row %}">
                     <td style="white-space: nowrap;">{{ transaction.value_datetime.date }}</td>
-                    <td>{{ transaction.find_memo }}</td>
+                    <td>
+                        <a data-toggle="collapse" data-target=".collapse-{{transaction.id}}" aria-controls="collapse-{{transaction.id}}">
+                            <span class="fa fa-angle-down"></span>
+                            {{ transaction.find_memo }}
+                        </a>
+                    </td>
                     <td>{{ booking.member.name }}</td>
                     <td>
                         {{ booking.counter_bookings | extract_property:"account" | join:", <br/> "}}
@@ -44,6 +49,25 @@
                         {% endif %}
                     </td>
                 </tr>
+                {% for related_booking in related_bookings %}
+                <tr class="collapse in related-{{ account_row }}-{% cycle 'related-odd' 'related-even' as related_row %} collapse-{{transaction.id}} {% if forloop.first %}related-first{% endif %} {% if forloop.last %}related-last{% endif %}">
+                    <td class="related-empty"></td>
+                    <td>{{ related_booking.memo|default:"" }}</td>
+                    <td>{{ related_booking.member.name }}</td>
+                    <td>{{ related_booking.account }}</td>
+                    <td class="text-md-right">
+                        {% if related_booking.booking_type == BookingType.DEBIT %}
+                            {{ related_booking.amount }}
+                        {% endif %}
+                    </td>
+                    <td class="text-md-right">
+                        {% if related_booking.booking_type == BookingType.CREDIT %}
+                            {{ related_booking.amount }}
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+                {% resetcycle related_row %}
             {% endwith %}
             {% endwith %}
         {% endfor %}
