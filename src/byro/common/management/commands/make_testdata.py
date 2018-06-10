@@ -75,10 +75,12 @@ class Command(BaseCommand):
                 text += ", " + _("EUR {amount} donation").format(amount=donates)
             
             t = Transaction.objects.create(
-                text=text,
                 value_datetime=liability.transaction.value_datetime
             )
-            t.debit(account=self.bank_account, amount=amount)
+            t.debit(
+                memo=text,
+                account=self.bank_account, amount=amount
+            )
             if donates:
                 t.credit(account=config.donations_account, member=member, amount=donates)
             t.credit(account=config.fees_receivable_account, member=member, amount=pure_amount)
@@ -213,39 +215,49 @@ class Command(BaseCommand):
         bank_account = self.bank_account
         
         t = Transaction.objects.create(
-            text=_("Belated member fee payment for Olga"),
             value_datetime=(now()-relativedelta(days=23)).date(),
         )
-        t.debit(account=bank_account, amount=20)
+        t.debit(
+            memo=_("Belated member fee payment for Olga"),
+            account=bank_account, amount=20
+        )
         t.save()
 
         t = Transaction.objects.create(
-            text=_("George lives to give, donation"),
             value_datetime=(now()-relativedelta(days=17)).date(),
         )
-        t.debit(account=bank_account, amount=42.23)
+        t.debit(
+            memo=_("George lives to give, donation"),
+            account=bank_account, amount=42.23
+        )
         t.save()
 
         for i in range(1,4):
             t = Transaction.objects.create(
-                text=_("Bank fees"),
                 value_datetime=(now()-relativedelta(months=i)).date(),
             )
-            t.credit(account=bank_account, amount=9.95)
+            t.credit(
+                memo=_("Bank fees"),
+                account=bank_account, amount=9.95
+            )
             t.save()
 
         t = Transaction.objects.create(
-            text=_("ACME Inc. thanks you for your patronage, sale of one halo kite"),
             value_datetime=(now()-relativedelta(days=21)).date(),
         )
-        t.credit(account=bank_account, amount=123)
+        t.credit(
+            memo=_("ACME Inc. thanks you for your patronage, sale of one halo kite"),
+            account=bank_account, amount=123
+        )
         t.save()
 
         t = Transaction.objects.create(
-            text=_("ACME Inc. thanks you for your patronage, sale of one emergency medkit"),
             value_datetime=(now()-relativedelta(days=20)).date(),
         )
-        t.credit(account=bank_account, amount=666)
+        t.credit(
+            memo=_("ACME Inc. thanks you for your patronage, sale of one emergency medkit"),
+            account=bank_account, amount=666
+        )
         t.save()
 
 

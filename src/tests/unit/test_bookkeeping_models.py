@@ -21,7 +21,7 @@ def test_account_methods(receivable_account):
 
 @pytest.mark.django_db
 def test_transaction_balances(receivable_account, income_account):
-    t = Transaction.objects.create(text='Beitrag wird fällig')
+    t = Transaction.objects.create(memo='Beitrag wird fällig')
     for booking in [
             dict(amount=10, booking_type=BookingType.DEBIT, account=receivable_account),
             dict(amount=10, booking_type=BookingType.CREDIT, account=income_account)
@@ -41,7 +41,7 @@ def test_transaction_methods(receivable_account):
 
 @pytest.mark.django_db
 def test_account_balances(bank_account, receivable_account, income_account):
-    t1 = Transaction.objects.create(text='Beitrag wird fällig')
+    t1 = Transaction.objects.create(memo='Beitrag wird fällig')
     t1.debit(amount=10, account=receivable_account),
     t1.credit(amount=10, account=income_account)
     t1.save()
@@ -50,7 +50,7 @@ def test_account_balances(bank_account, receivable_account, income_account):
     assert income_account.balance(end=None) == 10
     assert receivable_account.balance(end=None) == 10
 
-    t2 = Transaction.objects.create(text='Beitrag wird gezahlt')
+    t2 = Transaction.objects.create(memo='Beitrag wird gezahlt')
     t2.debit(amount=10, account=bank_account)
     t2.credit(amount=10, account=receivable_account),
     t2.save()

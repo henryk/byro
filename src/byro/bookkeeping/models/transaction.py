@@ -23,7 +23,7 @@ class Transaction(Auditable, models.Model):
     booking_datetime = models.DateTimeField(null=True)
     value_datetime = models.DateTimeField(null=True)
 
-    text = models.CharField(max_length=1000)
+    memo = models.CharField(max_length=1000, null=True, blank=True)
 
     data = JSONField(null=True)
 
@@ -74,6 +74,14 @@ class Transaction(Auditable, models.Model):
     def unbalanced_transactions(cls):
         return cls.with_balance.exclude(transaction_balance=0)
 
+    def find_memo(self):
+        if self.memo:
+            return self.memo
+        booking = self.bookings.exclude(memo=None).first()
+        if booking:
+            return booking.memo
+        return None
+
 
 class Booking(Auditable, models.Model):
     transaction = models.ForeignKey(
@@ -99,6 +107,7 @@ class Booking(Auditable, models.Model):
         max_length=BookingType.max_length,
         null=False, blank=False,
     )
+    memo = models.CharField(max_length=1000, null=True)
     amount = models.DecimalField(
         max_digits=8, decimal_places=2,  # TODO: enforce min_value = 0
     )
@@ -111,6 +120,11 @@ class Booking(Auditable, models.Model):
             booking_type=self.booking_type,
             account=self.account,
         )
+
+    def find_memo(self):
+        if self.memo:
+            return memo
+        return self.transaction.find_memo()
 
     @property
     def counter_bookings(self):

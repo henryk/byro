@@ -145,7 +145,7 @@ class Member(Auditable, models.Model):
                             b.amount = membership.amount
                         t.save()
                 else:
-                    t = Transaction.objects.create(value_datetime=date, text=_("Membership due"))
+                    t = Transaction.objects.create(value_datetime=date, memo=_("Membership due"))
                     t.debit(account=dst_account, amount=membership.amount, member=self)
                     t.credit(account=src_account, amount=membership.amount, member=self)
                     t.save()

@@ -28,7 +28,7 @@
             {% with related_bookings=transaction.bookings is_balanced=transaction.is_balanced %}
                 <tr class="transaction-{% if not is_balanced %}unbalanced-{% endif %}{% cycle 'row-odd' 'row-even' %}">
                     <td style="white-space: nowrap;">{{ transaction.value_datetime.date }}</td>
-                    <td>{{ transaction.text }}</td>
+                    <td>{{ transaction.find_memo }}</td>
                     <td>{{ booking.member.name }}</td>
                     <td>
                         {{ booking.counter_bookings | extract_property:"account" | join:", <br/> "}}
