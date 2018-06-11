@@ -5,10 +5,18 @@ from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic import DetailView, FormView, ListView
 
-from byro.bookkeeping.models import Account, BookingType, Transaction
+from byro.bookkeeping.models import Account, AccountCategory, BookingType, Transaction
 
 FORM_CLASS = forms.modelform_factory(Account, fields=['name', 'account_category'])
 
+TRANSLATED_NAMES = {
+    # FIXME Check this with an accountant who is a native english speaker
+    AccountCategory.INCOME: (_('Charge'), _('Revenue')),
+    AccountCategory.ASSET: (_('Increase'), _('Decrease')),
+    AccountCategory.EQUITY: (_('Decrease'), _('Increase')),
+    AccountCategory.LIABILITY: (_('Decrease'), _('Increase')),
+    AccountCategory.EXPENSE: (_('Expense'), _('Rebate')),
+}
 
 class AccountListView(ListView):
     template_name = 'office/account/list.html'
@@ -57,6 +65,10 @@ class AccountDetailView(ListView):
         context['form'] = self.get_form()
         context['account'] = self.get_object()
         context['BookingType'] = BookingType
+        context['TRANSLATED_NAMES'] = TRANSLATED_NAMES.get(
+            self.get_object().account_category,
+            (_("Debit"), _("Credit"))
+        )
         return context
 
 

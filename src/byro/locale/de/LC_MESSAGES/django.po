@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-06-10 21:54+0000\n"
-"PO-Revision-Date: 2018-06-11 00:02+0200\n"
+"POT-Creation-Date: 2018-06-11 14:13+0000\n"
+"PO-Revision-Date: 2018-06-11 16:15+0200\n"
 "Last-Translator: Henryk Plötz <henryk@ploetzli.ch>\n"
 "Language-Team: \n"
 "Language: de\n"
@@ -84,42 +84,42 @@ msgstr "Standarddatum"
 msgid "Default value"
 msgstr "Standardwert"
 
-#: byro/common/management/commands/make_testdata.py:45
+#: byro/common/management/commands/make_testdata.py:46
 msgid "Demo bank account"
 msgstr "Demo-Bankkonto"
 
-#: byro/common/management/commands/make_testdata.py:65
+#: byro/common/management/commands/make_testdata.py:66
 #, python-brace-format
 msgid "Member fee for {number}"
 msgstr "Mitgliedsbeitrag für {number}"
 
-#: byro/common/management/commands/make_testdata.py:69
+#: byro/common/management/commands/make_testdata.py:70
 #, python-brace-format
 msgid "and for {number}"
 msgstr "und für {number}"
 
-#: byro/common/management/commands/make_testdata.py:75
+#: byro/common/management/commands/make_testdata.py:76
 #, python-brace-format
 msgid "EUR {amount} donation"
 msgstr "EUR {amount} Spende"
 
-#: byro/common/management/commands/make_testdata.py:221
+#: byro/common/management/commands/make_testdata.py:222
 msgid "Belated member fee payment for Olga"
 msgstr "Verspäteter Mitgliedsbeitrag von Olga"
 
-#: byro/common/management/commands/make_testdata.py:230
+#: byro/common/management/commands/make_testdata.py:231
 msgid "George lives to give, donation"
 msgstr "George spendet gerne, Spende"
 
-#: byro/common/management/commands/make_testdata.py:240
+#: byro/common/management/commands/make_testdata.py:241
 msgid "Bank fees"
 msgstr "Bankgebühren"
 
-#: byro/common/management/commands/make_testdata.py:249
+#: byro/common/management/commands/make_testdata.py:250
 msgid "ACME Inc. thanks you for your patronage, sale of one halo kite"
 msgstr "Vielen Dank für Ihren Einkauf bei ACME Inc., Ein Atmosphärendrachen"
 
-#: byro/common/management/commands/make_testdata.py:258
+#: byro/common/management/commands/make_testdata.py:259
 msgid "ACME Inc. thanks you for your patronage, sale of one emergency medkit"
 msgstr "Vielen Dank für Ihren Einkauf bei ACME Inc., Ein Notfall-Medkit"
 
@@ -510,18 +510,6 @@ msgstr "Zweck"
 msgid "Account"
 msgstr "Konto"
 
-#: byro/office/templates/office/account/detail.html:22
-#: byro/office/templates/office/account/list.html:21
-#: byro/office/templates/office/transaction/detail.html:20
-msgid "Incoming"
-msgstr "Eingehend"
-
-#: byro/office/templates/office/account/detail.html:23
-#: byro/office/templates/office/account/list.html:22
-#: byro/office/templates/office/transaction/detail.html:21
-msgid "Outgoing"
-msgstr "Ausgehend"
-
 #: byro/office/templates/office/account/list.html:5
 #: byro/office/templates/office/base.html:115
 msgid "Accounts"
@@ -539,6 +527,16 @@ msgstr "Unzugeordnete Buchungen"
 #: byro/office/templates/office/user/list.html:16
 msgid "Type"
 msgstr "Art"
+
+#: byro/office/templates/office/account/list.html:21
+#: byro/office/templates/office/transaction/detail.html:20
+msgid "Incoming"
+msgstr "Eingehend"
+
+#: byro/office/templates/office/account/list.html:22
+#: byro/office/templates/office/transaction/detail.html:21
+msgid "Outgoing"
+msgstr "Ausgehend"
 
 #: byro/office/templates/office/account/list.html:23
 #: byro/office/templates/office/member/list.html:33
@@ -967,7 +965,33 @@ msgstr ""
 msgid "Frontend user"
 msgstr ""
 
-#: byro/office/views/accounts.py:26 byro/office/views/members.py:79
+#: byro/office/views/accounts.py:14
+msgid "Charge"
+msgstr "Einahmenminderung"
+
+#: byro/office/views/accounts.py:14
+msgid "Revenue"
+msgstr "Einnahme"
+
+#: byro/office/views/accounts.py:15 byro/office/views/accounts.py:16
+#: byro/office/views/accounts.py:17
+msgid "Increase"
+msgstr "Zugang"
+
+#: byro/office/views/accounts.py:15 byro/office/views/accounts.py:16
+#: byro/office/views/accounts.py:17
+msgid "Decrease"
+msgstr "Abgang"
+
+#: byro/office/views/accounts.py:18
+msgid "Expense"
+msgstr "Ausgabe"
+
+#: byro/office/views/accounts.py:18
+msgid "Rebate"
+msgstr "Ausgabenminderung"
+
+#: byro/office/views/accounts.py:34 byro/office/views/members.py:79
 msgid "The member was added, please edit additional details if applicable."
 msgstr ""
 "Das Mitglied wurde gespeichert, bitte füge zusätzliche Informationen hinzu, "
