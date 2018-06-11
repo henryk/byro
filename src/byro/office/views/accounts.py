@@ -48,7 +48,9 @@ class AccountDetailView(ListView):
         return qs
 
     def get_form(self):
-        return FORM_CLASS(instance=self.get_object(), data=self.request.POST if self.request.method == 'post' else None)
+        form = FORM_CLASS(instance=self.get_object(), data=self.request.POST if self.request.method == 'post' else None)
+        form.fields['account_category'].disabled=True
+        return form
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
