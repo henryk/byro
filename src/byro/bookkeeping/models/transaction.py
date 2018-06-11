@@ -123,7 +123,7 @@ class Booking(Auditable, models.Model):
 
     def find_memo(self):
         if self.memo:
-            return memo
+            return self.memo
         return self.transaction.find_memo()
 
     @property
