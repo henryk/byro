@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib import messages
+from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
@@ -55,8 +56,8 @@ class AccountDetailView(ListView):
         qs = qs.prefetch_related('transaction').filter(transaction__value_datetime__lte=now()).order_by('-transaction__value_datetime')
         return qs
 
-    def get_form(self):
-        form = FORM_CLASS(instance=self.get_object(), data=self.request.POST if self.request.method == 'post' else None)
+    def get_form(self, request=None):
+        form = FORM_CLASS(request.POST if request else None, instance=self.get_object())
         form.fields['account_category'].disabled=True
         return form
 
@@ -70,6 +71,14 @@ class AccountDetailView(ListView):
             (_("Debit"), _("Credit"))
         )
         return context
+
+    def post(self, request, *args, **kwargs):
+        form = self.get_form(request)
+        if form.is_valid() and form.has_changed():
+            form.save()
+            messages.success(self.request, _('Your changes have been saved.'))
+        return redirect(reverse('office:finance.accounts.detail', kwargs=self.kwargs))
+
 
 
 class AccountDeleteView(DetailView):
