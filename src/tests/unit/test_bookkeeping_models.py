@@ -29,6 +29,7 @@ def test_transaction_balances(receivable_account, income_account):
         Booking.objects.create(transaction=t, **booking)
     assert t.is_balanced()
 
+
 @pytest.mark.django_db
 def test_transaction_methods(receivable_account):
     t = Transaction.objects.create()
@@ -38,6 +39,7 @@ def test_transaction_methods(receivable_account):
     assert t.total_credit() == 0
     assert t.total_debit() == 10
     assert not t.is_balanced()
+
 
 @pytest.mark.django_db
 def test_account_balances(bank_account, receivable_account, income_account):
@@ -54,7 +56,7 @@ def test_account_balances(bank_account, receivable_account, income_account):
     t2.debit(amount=10, account=bank_account)
     t2.credit(amount=10, account=receivable_account),
     t2.save()
-    
+
     assert income_account.balance(end=None) == 10
     assert receivable_account.balance(end=None) == 0
     assert bank_account.balance(end=None) == 10

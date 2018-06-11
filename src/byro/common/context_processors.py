@@ -4,9 +4,9 @@ from django.conf import settings
 from django.http import Http404
 from django.urls import resolve
 
+from byro.bookkeeping.models import Transaction
 from byro.common.models import Configuration
 from byro.mails.models import EMail
-from byro.bookkeeping.models import Transaction
 from byro.office.signals import nav_event
 
 

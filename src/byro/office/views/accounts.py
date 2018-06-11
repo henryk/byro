@@ -6,7 +6,9 @@ from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic import DetailView, FormView, ListView
 
-from byro.bookkeeping.models import Account, AccountCategory, BookingType, Transaction
+from byro.bookkeeping.models import (
+    Account, AccountCategory, BookingType, Transaction,
+)
 
 FORM_CLASS = forms.modelform_factory(Account, fields=['name', 'account_category'])
 
@@ -18,6 +20,7 @@ TRANSLATED_NAMES = {
     AccountCategory.LIABILITY: (_('Decrease'), _('Increase')),
     AccountCategory.EXPENSE: (_('Expense'), _('Rebate')),
 }
+
 
 class AccountListView(ListView):
     template_name = 'office/account/list.html'
@@ -58,7 +61,7 @@ class AccountDetailView(ListView):
 
     def get_form(self, request=None):
         form = FORM_CLASS(request.POST if request else None, instance=self.get_object())
-        form.fields['account_category'].disabled=True
+        form.fields['account_category'].disabled = True
         return form
 
     def get_context_data(self, *args, **kwargs):
@@ -78,7 +81,6 @@ class AccountDetailView(ListView):
             form.save()
             messages.success(self.request, _('Your changes have been saved.'))
         return redirect(reverse('office:finance.accounts.detail', kwargs=self.kwargs))
-
 
 
 class AccountDeleteView(DetailView):

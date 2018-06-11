@@ -1,13 +1,9 @@
-import decimal
-
 import pytest
 from dateutil.relativedelta import relativedelta
 from django.contrib.auth import get_user_model
 from django.utils.timezone import now
 
-from byro.bookkeeping.models import (
-    Account, AccountCategory, Booking, Transaction,
-)
+from byro.bookkeeping.models import Account, AccountCategory
 from byro.mails.models import EMail, MailTemplate
 from byro.members.models import FeeIntervals, Member, Membership
 

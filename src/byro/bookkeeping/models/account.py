@@ -6,7 +6,7 @@ from django.utils.translation import ugettext_lazy as _
 from byro.common.models.auditable import Auditable
 from byro.common.models.choices import Choices
 
-from .transaction import Transaction, BookingType
+from .transaction import BookingType, Transaction
 
 
 class AccountCategory(Choices):

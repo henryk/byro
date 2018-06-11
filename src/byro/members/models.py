@@ -119,7 +119,7 @@ class Member(Auditable, models.Model):
         return config.fees_receivable_account.debits.filter(member=self, transaction__value_datetime__lte=now())
 
     def update_liabilites(self):
-        from byro.bookkeeping.models import Account, Transaction
+        from byro.bookkeeping.models import Transaction
 
         config = Configuration.get_solo()
         booking_date = now()

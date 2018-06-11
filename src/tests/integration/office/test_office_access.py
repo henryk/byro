@@ -10,7 +10,6 @@ from django.shortcuts import reverse
     'members.list',
     'members.add',
     #'finance.transactions.list', ## FIXME
-    #'finance.transactions.match',
     'finance.uploads.list',
     'finance.uploads.add',
     'finance.accounts.list',

@@ -60,8 +60,8 @@ class Command(BaseCommand):
         for index, liability in enumerate(member.bookings.filter(account=config.fees_receivable_account, booking_type=BookingType.DEBIT, transaction__value_datetime__lte=now()).all()):
             if vaguely and index % 2 == 0:
                 continue
-            
-            pure_amount=liability.amount if not overly else liability.amount * 2
+
+            pure_amount = liability.amount if not overly else liability.amount * 2
 
             text = _("Member fee for {number}").format(number=member.number)
 
@@ -74,7 +74,7 @@ class Command(BaseCommand):
             if donates:
                 amount += donates
                 text += ", " + _("EUR {amount} donation").format(amount=donates)
-            
+
             t = Transaction.objects.create(
                 value_datetime=liability.transaction.value_datetime
             )
@@ -214,7 +214,7 @@ class Command(BaseCommand):
     def create_bank_chaff(self):
         "Create some dummy traffic, and a couple of unmatched transactions on the bank account"
         bank_account = self.bank_account
-        
+
         t = Transaction.objects.create(
             value_datetime=(now()-relativedelta(days=23)).date(),
         )
@@ -233,7 +233,7 @@ class Command(BaseCommand):
         )
         t.save()
 
-        for i in range(1,4):
+        for i in range(1, 4):
             t = Transaction.objects.create(
                 value_datetime=(now()-relativedelta(months=i)).date(),
             )
@@ -260,7 +260,6 @@ class Command(BaseCommand):
             account=bank_account, amount=666
         )
         t.save()
-
 
     @transaction.atomic()
     def handle(self, *args, **options):

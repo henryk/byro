@@ -1,13 +1,13 @@
 from django import forms
-from django.shortcuts import redirect
 from django.contrib import messages
+from django.shortcuts import redirect
 from django.urls import reverse
-from django.utils.timezone import now
-from django.utils.translation import ugettext_lazy as _
-from django.views.generic import DetailView, FormView, ListView
 from django.utils.functional import cached_property
+from django.utils.translation import ugettext_lazy as _
+from django.views.generic import ListView
 
 from byro.bookkeeping.models import Account, Booking, BookingType, Transaction
+
 
 class NewBookingForm(forms.Form):
     memo = forms.CharField(label=_('Memo'), max_length=1000, required=False)
@@ -15,6 +15,7 @@ class NewBookingForm(forms.Form):
     account = Booking._meta.get_field('account').formfield()
     debit_value = forms.DecimalField(min_value=0, max_digits=8, decimal_places=2, required=False)
     credit_value = forms.DecimalField(min_value=0, max_digits=8, decimal_places=2, required=False)
+
 
 class TransactionDetailView(ListView):
     template_name = 'office/transaction/detail.html'
@@ -74,14 +75,14 @@ class TransactionDetailView(ListView):
                 if account.unbalanced_transactions.count():
                     return redirect(
                         "{}?filter=unbalanced".format(
-                            reverse('office:finance.accounts.detail', kwargs={'pk':account.pk})
+                            reverse('office:finance.accounts.detail', kwargs={'pk': account.pk})
                         )
                     )
             return redirect('office:finance.accounts.list')
         if 'in_account' in request.GET:
             return redirect(
                 "{}?in_account={}".format(
-                    reverse('office:finance.transactions.detail', kwargs={'pk':t.pk}),
+                    reverse('office:finance.transactions.detail', kwargs={'pk': t.pk}),
                     request.GET['in_account']
                 )
             )
