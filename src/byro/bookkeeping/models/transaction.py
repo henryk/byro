@@ -129,7 +129,7 @@ class Booking(Auditable, models.Model):
     @property
     def counter_bookings(self):
         if self.booking_type == BookingType.CREDIT:
-            return self.transaction.debits
+            return self.transaction.debits.prefetch_related('account')
         elif self.booking_type == BookingType.DEBIT:
-            return self.transaction.credits
+            return self.transaction.credits.prefetch_related('account')
         return None

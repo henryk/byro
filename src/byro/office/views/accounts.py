@@ -59,13 +59,23 @@ class AccountDetailView(ListView):
         qs = self.get_object().bookings
         qs = qs.prefetch_related('account', 'transaction__bookings__account', 'transaction__bookings__member')
         qs = qs.annotate(
-            transaction_balance=models.Sum(
+            transaction_debit_sum=models.Sum(
                 models.Case(
                     models.When(transaction__bookings__booking_type=BookingType.DEBIT, then="transaction__bookings__amount"),
-                    models.When(transaction__bookings__booking_type=BookingType.CREDIT, then=0-models.F("transaction__bookings__amount")),
+                    default=0,
+                    output_field=models.IntegerField()
+                )
+            ),
+            transaction_credit_sum=models.Sum(
+                models.Case(
+                    models.When(transaction__bookings__booking_type=BookingType.CREDIT, then="transaction__bookings__amount"),
+                    default=0,
                     output_field=models.IntegerField()
                 )
             )
+        )
+        qs = qs.annotate(
+            transaction_balance=models.F('transaction_debit_sum')-models.F('transaction_credit_sum')
         )
         if self.request.GET.get('filter') == 'unbalanced':
             qs = qs.filter(transaction__in=self.get_object().unbalanced_transactions)
