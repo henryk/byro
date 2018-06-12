@@ -189,8 +189,8 @@ class MemberFinanceView(MemberView):
     def get_bookings(self):
         config = Configuration.get_solo()
         return self.get_member().bookings.filter(
-            Q(account=config.fees_receivable_account, booking_type=BookingType.CREDIT) |
-            Q(account=config.donations_account, booking_type=BookingType.CREDIT),
+            Q(account=config.fees_receivable_account) |
+            Q(account=config.donations_account),
             transaction__value_datetime__lte=now(),
         ).order_by('-transaction__value_datetime')
 
@@ -198,6 +198,7 @@ class MemberFinanceView(MemberView):
         context = super().get_context_data(*args, **kwargs)
         context['member'] = self.get_member()
         context['bookings'] = self.get_bookings()
+        context['BookingType'] = BookingType
         return context
 
 
