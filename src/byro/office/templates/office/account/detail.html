@@ -26,9 +26,9 @@
     <tbody>
         {% for booking in bookings %}
             {% with transaction=booking.transaction %}
-            {% with related_bookings=transaction.bookings.all is_balanced=transaction.is_balanced %}
-                <tr class="transaction-{% if not is_balanced %}unbalanced-{% endif %}{% cycle 'row-odd' 'row-even' as account_row %}">
-                    {% if is_balanced %}
+            {% with related_bookings=transaction.bookings.all %}
+                <tr class="transaction-{% if not booking.transaction_balance == 0 %}unbalanced-{% endif %}{% cycle 'row-odd' 'row-even' as account_row %}">
+                    {% if booking.transaction_balance == 0 %}
                         <td></td>
                     {% else %}
                         <td>
