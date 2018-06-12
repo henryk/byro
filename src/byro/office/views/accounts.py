@@ -50,10 +50,12 @@ class AccountDetailView(ListView):
     paginate_by = 25
 
     def get_object(self):
-        return Account.objects.get(pk=self.kwargs['pk'])
+        if not hasattr(self, 'object'):
+            self.object = Account.objects.get(pk=self.kwargs['pk'])
+        return self.object
 
     def get_queryset(self):
-        qs = self.get_object().bookings
+        qs = self.get_object().bookings.prefetch_related('account', 'transaction__bookings__account', 'transaction__bookings__member')
         if self.request.GET.get('filter') == 'unbalanced':
             qs = qs.filter(transaction__in=self.get_object().unbalanced_transactions)
         qs = qs.prefetch_related('transaction').filter(transaction__value_datetime__lte=now()).order_by('-transaction__value_datetime')
