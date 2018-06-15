@@ -1,5 +1,5 @@
 from django.contrib.postgres.fields import JSONField
-from django.db import models
+from django.db import models, transaction
 from django.utils.decorators import classproperty
 from django.utils.translation import ugettext_lazy as _
 
@@ -82,6 +82,31 @@ class Transaction(Auditable, models.Model):
             return booking.memo
         return None
 
+    @transaction.atomic
+    def process_transaction(self):
+        """
+        Collects responses to the signal `process_transaction`. Raises an
+        exception if multiple results were found, and re-raises received Exceptions.
+
+        Returns a list of one or more VirtualTransaction objects if no Exception
+        was raised.
+        """
+        from byro.bookkeeping.signals import process_transaction
+        responses = process_transaction.send_robust(sender=self)
+        if len(responses) > 1:
+            raise Exception('More than one plugin tried to derive virtual transactions: {}'.format([r[0].__module__ + '.' + r[0].__name__ for r in responses]))
+        if len(responses) < 1:
+            raise Exception('No plugin tried to derive virtual transactions.')
+        receiver, response = responses[0]
+
+        if isinstance(response, Exception):
+            raise response
+
+        if not isinstance(response, list) or len(response) == 0:
+            raise Exception('Transaction could not be matched')
+
+        return response  # TODO: sanity check response for virtual transaction objects
+
 
 class Booking(Auditable, models.Model):
     transaction = models.ForeignKey(
@@ -113,6 +138,12 @@ class Booking(Auditable, models.Model):
     )
     data = JSONField(null=True)
     importer = models.CharField(null=True, max_length=500)
+    source = models.ForeignKey(
+        to="bookkeeping.RealTransactionSource",
+        on_delete=models.PROTECT,
+        related_name='bookings',
+        null=True,
+    )
 
     def __str__(self):
         return "{amount} {booking_type} {account}".format(
